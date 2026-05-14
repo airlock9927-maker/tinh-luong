@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tính Lương Thực Nhận</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --card: #1a1a26;
+      --border: #2a2a3d;
+      --accent: #7c3aed;
+      --accent2: #06b6d4;
+      --text: #f0f0ff;
+      --muted: #8888aa;
+      --green: #10b981;
+      --red: #f43f5e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Be Vietnam Pro', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 80px;
+    }
+
+    /* Background effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(ellipse, rgba(124,58,237,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(124,58,237,0.2);
+      border: 1px solid rgba(124,58,237,0.4);
+      color: #a78bfa;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #f0f0ff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 300;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+
+    input::placeholder { color: #444466; font-weight: 400; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: rgba(124,58,237,0.2);
+      border-color: var(--accent);
+      color: #a78bfa;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), #4f46e5);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.3px;
+      margin-top: 8px;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.99); }
+
+    /* Result */
+    .result-card {
+      background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(6,182,212,0.08));
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 20px;
+      display: none;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .result-card.show { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-main {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .result-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .result-amount {
+      font-size: clamp(32px, 8vw, 52px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      background: linear-gradient(135deg, var(--green), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .result-unit {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .breakdown-row .bk-label { color: var(--muted); }
+    .breakdown-row .bk-value { font-weight: 700; }
+    .breakdown-row .bk-value.minus { color: var(--red); }
+    .breakdown-row .bk-value.plus { color: var(--green); }
+    .breakdown-row .bk-value.neutral { color: var(--text); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    footer a { color: #a78bfa; text-decoration: none; }
+
+    select option { background: #1a1a26; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="badge">🇻🇳 Công cụ miễn phí</div>
+    <h1>Tính Lương<br>Thực Nhận</h1>
+    <p class="subtitle">Tính nhanh lương net sau thuế TNCN & BHXH</p>
+  </header>
+
+  <div class="card">
+    <p class="card-title">Thông tin của bạn</p>
+
+    <div class="field">
+      <label>Lương Gross (trước thuế)</label>
+      <input type="number" id="gross" placeholder="VD: 15000000" min="0"/>
+    </div>
+
+    <div class="field">
+      <label>Số người phụ thuộc</label>
+      <input type="number" id="dependants" placeholder="0" min="0" max="10" value="0"/>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Khu vực</label>
+        <select id="region">
+          <option value="1">Vùng 1 (HN, HCM)</option>
+          <option value="2">Vùng 2</option>
+          <option value="3">Vùng 3</option>
+          <option value="4">Vùng 4</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Loại hợp đồng</label>
+        <select id="contract">
+          <option value="official">Chính thức (BHXH)</option>
+          <option value="freelance">Freelance (không BH)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" onclick="calculate()">Tính lương ngay →</button>
+  </div>
+
+  <div class="result-card" id="result">
+    <p class="card-title">Kết quả</p>
+    <div class="result-main">
+      <p class="result-label">Lương Net thực nhận</p>
+      <div class="result-amount" id="net-amount">0</div>
+      <p class="result-unit">đồng / tháng</p>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+  </div>
+
+  <footer>
+    Công cụ tham khảo theo luật thuế VN 2024 · <a href="#">Chia sẻ cho bạn bè</a>
+  </footer>
+</div>
+
+<script>
+  // Minimum wages by region (2024)
+  const minWage = { 1: 4960000, 2: 4410000, 3: 3860000, 4: 3450000 };
+
+  // BHXH/BHYT/BHTN employee rates
+  const BH_RATE = 0.105; // 8% BHXH + 1.5% BHYT + 1% BHTN
+
+  // Personal deduction
+  const PERSONAL_DEDUCT = 11000000;
+  const DEPENDENT_DEDUCT = 4400000;
+
+  function calcTax(taxableIncome) {
+    const brackets = [
+      [5000000, 0.05],
+      [5000000, 0.10],
+      [8000000, 0.15],
+      [14000000, 0.20],
+      [20000000, 0.25],
+      [28000000, 0.30],
+      [Infinity, 0.35],
+    ];
+    let tax = 0;
+    let remaining = Math.max(0, taxableIncome);
+    for (const [limit, rate] of brackets) {
+      if (remaining <= 0) break;
+      const chunk = Math.min(remaining, limit);
+      tax += chunk * rate;
+      remaining -= chunk;
+    }
+    return tax;
+  }
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString('vi-VN');
+  }
+
+  function calculate() {
+    const gross = parseFloat(document.getElementById('gross').value) || 0;
+    const dependants = parseInt(document.getElementById('dependants').value) || 0;
+    const region = parseInt(document.getElementById('region').value);
+    const contract = document.getElementById('contract').value;
+
+    if (gross <= 0) {
+      alert('Vui lòng nhập lương Gross!');
+      return;
+    }
+
+    let bhxh = 0, bhyt = 0, bhtn = 0, tncn = 0;
+    let net = gross;
+
+    if (contract === 'official') {
+      // Salary cap for BHXH (29.8M * 20 = ... actually cap is 36 months min wage region 1 for BHXH)
+      const bhxhCap = minWage[1] * 20; // ~99.2M (simplified)
+      const bhBase = Math.min(gross, bhxhCap);
+
+      bhxh = bhBase * 0.08;
+      bhyt = bhBase * 0.015;
+      bhtn = Math.min(gross, minWage[region] * 20) * 0.01;
+
+      const totalBH = bhxh + bhyt + bhtn;
+      const deduction = PERSONAL_DEDUCT + dependants * DEPENDENT_DEDUCT;
+      const taxable = Math.max(0, gross - totalBH - deduction);
+      tncn = calcTax(taxable);
+      net = gross - totalBH - tncn;
+    } else {
+      // Freelance: 10% withholding tax if > 2M, no social insurance
+      if (gross > 2000000) {
+        tncn = gross * 0.1;
+      }
+      net = gross - tncn;
+    }
+
+    // Display
+    document.getElementById('net-amount').textContent = fmt(net);
+
+    let rows = '';
+    rows += `<div class="breakdown-row"><span class="bk-label">Lương Gross</span><span class="bk-value neutral">${fmt(gross)} đ</span></div>`;
+
+    if (contract === 'official') {
+      rows += `<div class="divider"></div>`;
+      rows += `<div class="breakdown-row"><span class="bk-label">BHXH (8%)</span><span class="bk-value minus">-${fmt(bhxh)} đ</span></div>`;
+      rows += `<div class="breakdown-row"><span class="bk-label">BHYT (1.5%)</span><span class="bk-value minus">-${fmt(bhyt)} đ</span></div>`;
+      rows += `<div class="breakdown-row"><span class="bk-label">BHTN (1%)</span><span class="bk-value minus">-${fmt(bhtn)} đ</span></div>`;
+    }
+
+    if (tncn > 0) {
+      rows += `<div class="divider"></div>`;
+      rows += `<div class="breakdown-row"><span class="bk-label">Thuế TNCN</span><span class="bk-value minus">-${fmt(tncn)} đ</span></div>`;
+    } else {
+      rows += `<div class="breakdown-row"><span class="bk-label">Thuế TNCN</span><span class="bk-value plus">Miễn thuế ✓</span></div>`;
+    }
+
+    rows += `<div class="divider"></div>`;
+    rows += `<div class="breakdown-row"><span class="bk-label" style="font-weight:700;color:var(--text)">Lương NET</span><span class="bk-value plus" style="font-size:16px">${fmt(net)} đ</span></div>`;
+
+    document.getElementById('breakdown').innerHTML = rows;
+
+    const resultEl = document.getElementById('result');
+    resultEl.classList.remove('show');
+    void resultEl.offsetWidth;
+    resultEl.classList.add('show');
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+</script>
+</body>
+</html>
